@@ -4,7 +4,7 @@ const MiddlewareController = require("../middleware/authMiddleware");
 
 router.post("/register", AccountController.register);
 router.post("/login", AccountController.login);
-router.get("/confirm/:accessToken", AccountController.confirmAccount);
+router.post("/confirm/", AccountController.confirmAccount);
 router.post(
   "/change_password",
   MiddlewareController.verifyToken,

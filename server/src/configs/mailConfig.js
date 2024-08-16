@@ -10,7 +10,8 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendConfirmationEmail(userEmail, token) {
-  const confirmationLink = `http://localhost:3000/confirm/${token}`;
+  const baseUrl = process.env.FRONTEND_PORT || "http://localhost:3000";
+  const confirmationLink = `${baseUrl}/verify/${token}`;
 
   const mailOptions = {
     from: process.env.EMAIL_USERNAME,

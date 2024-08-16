@@ -3,15 +3,21 @@ const jwt = require("jsonwebtoken");
 
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-const accessTokenExpiry = "15m"; // Access token expires in 15 minutes
+const accessTokenExpiry = "1m"; // Access token expires in 15 minutes
 const refreshTokenExpiry = "7d"; // Refresh token expires in 7 days
 
-function createAccessToken(userId, email) {
-  return jwt.sign({ userId, email }, accessTokenSecret, {
-    expiresIn: accessTokenExpiry,
-  });
+function createAccessToken(user) {
+  return jwt.sign(
+    {
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      avatar: user.avatar,
+    },
+    accessTokenSecret,
+    { expiresIn: accessTokenExpiry }
+  );
 }
-
 function createRefreshToken(userId) {
   return jwt.sign({ userId }, refreshTokenSecret, {
     expiresIn: refreshTokenExpiry,

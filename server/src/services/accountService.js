@@ -4,21 +4,32 @@ const Role = require("../model/roleSchema");
 const mailService = require("../configs/mailConfig");
 const generateRandomString = require("../configs/generateRandom");
 const jwt = require("jsonwebtoken");
-const {
-  createAccessToken,
-  createRefreshToken,
-  sendRefreshToken,
-} = require("../services/jwtService");
+const jwtService = require("../services/jwtService");
+const validator = require("validator");
 require("dotenv").config();
 
 async function register(
   username,
   email,
   password,
-  avatar = "defaultAvatar",
+  avatar = "https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png",
   status
 ) {
   try {
+    // Validation
+    if (!username || !email || !password) {
+      return {
+        status: 400,
+        msg: "Tên người dùng, email và mật khẩu là bắt buộc.",
+      };
+    }
+    if (!validator.isEmail(email)) {
+      return { status: 400, msg: "Địa chỉ email không hợp lệ." };
+    }
+    if (password.length < 8) {
+      return { status: 400, msg: "Mật khẩu phải có ít nhất 8 ký tự." };
+    }
+
     const existingAccount = await Account.findOne({ email });
     if (existingAccount) {
       return { status: 400, msg: "Email đã tồn tại, hãy sử dụng email khác." };
@@ -61,21 +72,21 @@ async function login(email, password) {
   try {
     const account = await Account.findOne({ email });
     if (!account) {
-      return { status: 400, msg: "Không tìm thấy email" };
+      return { status: 400, message: "Không tìm thấy email" };
     }
 
     const passwordMatch = await bcrypt.compare(password, account.password);
     if (!passwordMatch) {
-      return { status: 400, msg: "Mật khẩu cũ không chính xác" };
+      return { status: 400, message: "Mật khẩu không chính xác" };
     }
 
-    const accessToken = createAccessToken(account._id, email);
-    const refreshToken = createRefreshToken(account._id);
+    const accessToken = jwtService.createAccessToken(account); // Generate access token with user info
+    const refreshToken = jwtService.createRefreshToken(account._id);
 
-    return { status: 200, accessToken, refreshToken };
+    return { status: 200, accessToken, refreshToken, user: account };
   } catch (error) {
     console.error(`Failed to log in: ${error}`);
-    return { status: 500, msg: "Đã xảy ra lỗi trong quá trình đăng nhập" };
+    return { status: 500, message: "Đã xảy ra lỗi trong quá trình đăng nhập" };
   }
 }
 
@@ -123,22 +134,24 @@ async function renderNewPassword(email) {
 
 async function changePassword(email, oldPassword, newPassword) {
   try {
-    console.log(`Attempting to change password for email: ${email}`);
-
-    // Find the account by email
     const account = await Account.findOne({ email });
     if (!account) {
-      console.log("Account not found.");
       return {
         status: 400,
         msg: "Không tìm thấy tài khoản với email đã cung cấp.",
       };
     }
 
+    if (newPassword.length < 8) {
+      return {
+        status: 400,
+        msg: "Mật khẩu mới phải có ít nhất 8 ký tự.",
+      };
+    }
+
     // Verify old password
     const isPasswordValid = await bcrypt.compare(oldPassword, account.password);
     if (!isPasswordValid) {
-      console.log("Old password is incorrect.");
       return {
         status: 400,
         msg: "Mật khẩu cũ không chính xác.",
@@ -157,14 +170,11 @@ async function changePassword(email, oldPassword, newPassword) {
       { password: hashedNewPassword },
       { new: true }
     );
-
-    console.log("Password updated successfully.");
     return {
       status: 200,
       msg: "Đổi mật khẩu thành công.",
     };
   } catch (err) {
-    console.error(`Error changing password: ${err.message}`);
     return {
       status: 500,
       msg: "Không thể cập nhật mật khẩu tài khoản: " + err.message,
