@@ -153,9 +153,12 @@ async function changePassword(req, res) {
 async function logout(req, res) {
   try {
     await accountService.logout(req, res);
-    res.status(200).json({ message: "Đăng xuất thành công" });
+    res.status(200).json({ message: "Đăng xuất thành công." });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Đảm bảo rằng bạn không gửi phản hồi nếu đã gửi một lần
+    if (!res.headersSent) {
+      res.status(500).json({ message: error.message });
+    }
   }
 }
 
