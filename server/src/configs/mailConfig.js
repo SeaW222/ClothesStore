@@ -24,9 +24,8 @@ async function sendConfirmationEmail(userEmail, token) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Confirmation email sent to ${userEmail}`);
   } catch (error) {
-    console.error(`Failed to send confirmation email: ${error}`);
+    console.error(`Lỗi khi gửi email: ${error}`);
   }
 }
 
@@ -34,18 +33,18 @@ async function sendRandomPassword(password, userEmail) {
   const mailOptions = {
     from: process.env.EMAIL_USERNAME,
     to: userEmail,
-    subject: "New Password",
+    subject: "Mật khẩu mới",
     html: `
-      <p>This is your new password:</p>
+      <p>Đây là mật khẩu mới của bạn:</p>
       <h5>${password}</h5>
     `,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`New password sent to ${userEmail}`);
+    console.log(`Mật khẩu mới đã được gửi đến ${userEmail}`);
   } catch (err) {
-    throw new Error("Cannot send email: " + err.message);
+    throw new Error("Không thể gửi email: " + err.message);
   }
 }
 

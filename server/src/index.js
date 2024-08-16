@@ -7,7 +7,7 @@ const dotenv = require("dotenv");
 // config environment variables
 dotenv.config();
 
-//connect to mongoose db
+//kết nối tới mongoDB
 connectDB();
 
 app.use(express.json());
@@ -18,10 +18,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/404", (req, res) => {
-  return res.send("404 not found!");
+  return res.send("Không tìm thấy trang!");
 });
 
 const port = process.env.PORT || 3001;
 const server = app.listen(port, () => {
-  console.log("Server is running on " + port);
+  console.log("Server đang chạy trên port " + port);
 });

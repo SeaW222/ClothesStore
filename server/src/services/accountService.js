@@ -61,12 +61,12 @@ async function login(email, password) {
   try {
     const account = await Account.findOne({ email });
     if (!account) {
-      return { status: 400, msg: "Invalid email or password" };
+      return { status: 400, msg: "Không tìm thấy email" };
     }
 
     const passwordMatch = await bcrypt.compare(password, account.password);
     if (!passwordMatch) {
-      return { status: 400, msg: "Invalid email or password" };
+      return { status: 400, msg: "Mật khẩu cũ không chính xác" };
     }
 
     const accessToken = createAccessToken(account._id, email);
@@ -75,7 +75,7 @@ async function login(email, password) {
     return { status: 200, accessToken, refreshToken };
   } catch (error) {
     console.error(`Failed to log in: ${error}`);
-    return { status: 500, msg: "An error occurred while logging in" };
+    return { status: 500, msg: "Đã xảy ra lỗi trong quá trình đăng nhập" };
   }
 }
 
@@ -175,7 +175,7 @@ async function changePassword(email, oldPassword, newPassword) {
 async function logout(req, res) {
   try {
     res.clearCookie("refreshToken", { httpOnly: true, maxAge: 0 });
-    return res.status(200).json({ message: "Logged out successfully" });
+    return res.status(200).json({ message: "Đăng xuất thành công" });
   } catch (error) {
     console.error(`Error during logout: ${error}`);
     return res.status(500).json({ message: "An error occurred during logout" });

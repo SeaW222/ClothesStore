@@ -27,7 +27,7 @@ async function login(req, res) {
     );
 
     if (status !== 200) {
-      throw new Error("Invalid email or password");
+      throw new Error("Email hoặc password không đúng");
     }
 
     if (!accessToken || !refreshToken) {
